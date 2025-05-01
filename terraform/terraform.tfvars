@@ -2,7 +2,7 @@
 name        = "{NAME}"
 environment = "{ENVIRONMENT}"
 
-tags        = {
+tags = {
   CreatedBy   = "Terraform"
   Environment = "{ENVIRONMENT}"
   Team        = "{TEAM}"
