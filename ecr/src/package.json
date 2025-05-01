@@ -1,0 +1,11 @@
+{
+  "name": "docker-node-app",
+  "version": "1.0.0",
+  "description": "Docker Node App",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "author": "Google AI",
+  "license": "ISC"
+}

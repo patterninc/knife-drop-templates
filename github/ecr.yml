@@ -1,0 +1,60 @@
+name: '{ACCOUNT_NAME}: ECR Push'
+
+on:
+  push:
+    branches:
+     - 'main'
+    paths:
+    - 'docker/**'
+  pull_request:
+    branches:
+     - 'main'
+    paths:
+    - 'docker/**'
+
+jobs:
+  docker:
+    name: 'Docker {ACCOUNT_NAME}'
+    runs-on: ubuntu-latest
+    environment: {ENVIRONMENT}
+
+    # Use the Bash shell
+    defaults:
+      run:
+        shell: bash
+        working-directory: docker/
+
+    steps:
+
+    - name: Checkout
+      uses: actions/checkout@v2
+
+    - name: Add AWS profile and Git key settings
+      env:
+        AWS_ACCESS_KEY: ${{ secrets.AWS_{GHA}_ACCESS_KEY }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_{GHA}_SECRET_KEY }}
+
+      run: |
+        aws configure set aws_access_key_id $AWS_ACCESS_KEY --profile {ACCOUNT_PROFILE}
+        aws configure set aws_secret_access_key $AWS_SECRET_ACCESS_KEY --profile {ACCOUNT_PROFILE}
+        git config --global url."https://oauth2:${{ secrets.GHA_RUNNER_TOKEN }}@github.com".insteadOf https://github.com
+
+    - name: Copy Image to ECR
+      id: ecr
+      run: |
+        REGION="{INFRA_REGION}"
+        PROFILE="{ACCOUNT_PROFILE}"
+        REPO_NAME="{NAME}-{ENVIRONMENT}-{INFRA_REGION}"
+
+        aws ecr describe-repositories --repository-names $REPO_NAME --region $REGION --profile $PROFILE || aws ecr create-repository --repository-name ${REPO_NAME} --region $REGION --profile $PROFILE
+
+        aws ecr put-lifecycle-policy --repository-name "pr$REPO_NAME --lifecycle-policy-text "file://policy.json" --region $REGION --profile $PROFILE
+
+        DOCKER_IMAGE=`aws ecr describe-repositories --repository-names $REPO_NAME --query 'repositories[0].repositoryUri' --output text --region $REGION --profile $PROFILE`
+        ECR_URL=`echo $DOCKER_IMAGE | awk -F/ '{print $1}'`
+
+        aws ecr get-login-password --region $REGION --profile $PROFILE | docker login --username AWS --password-stdin $ECR_URL
+
+        cd src
+        docker build -t $DOCKER_IMAGE .
+        docker push $DOCKER_IMAGE
