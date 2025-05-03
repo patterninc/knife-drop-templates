@@ -1,6 +1,7 @@
 name: '{ACCOUNT_NAME}: ECR Push'
 
 on:
+  workflow_dispatch:
   push:
     branches:
      - 'main'
