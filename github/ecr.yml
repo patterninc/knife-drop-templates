@@ -53,7 +53,9 @@ jobs:
 
         aws ecr describe-repositories --repository-names $REPO_NAME --region $REGION --profile $PROFILE || aws ecr create-repository --repository-name ${REPO_NAME} --region $REGION --profile $PROFILE
 
-        aws ecr put-lifecycle-policy --repository-name "pr$REPO_NAME --lifecycle-policy-text "file://policy.json" --region $REGION --profile $PROFILE
+        sleep 10
+
+        aws ecr put-lifecycle-policy --repository-name $REPO_NAME --lifecycle-policy-text "file://policy.json" --region $REGION --profile $PROFILE
 
         DOCKER_IMAGE=`aws ecr describe-repositories --repository-names $REPO_NAME --query 'repositories[0].repositoryUri' --output text --region $REGION --profile $PROFILE`
         ECR_URL=`echo $DOCKER_IMAGE | awk -F/ '{print $1}'`
