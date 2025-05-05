@@ -99,6 +99,9 @@ module "alb" {
 data "aws_acm_certificate" "cert" {
   domain   = "*.${local.domain_name}"
   statuses = ["ISSUED"]
+  providers = {
+    aws = aws.{INFRA_REGION}
+  }
 }
 
 output "alb_endpoint" {
@@ -109,6 +112,9 @@ output "alb_endpoint" {
 data "aws_lb" "alb" {
   name = "${local.app_name}-${local.environment}-alb"
   depends_on = [ module.alb ]
+  providers = {
+    aws = aws.{INFRA_REGION}
+  }
 }
 
 data "aws_route53_zone" "account_domain" {
