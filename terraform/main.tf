@@ -24,7 +24,7 @@ locals {
 
 module "fargate" {
   source          = "github.com/patterninc/terraform-aws-fargate?ref=v3.4.1"
-  app_name        = local.app_name
+  app_name        = "${local.app_name}-${local.environment}-ecs"
   container_image = local.container_image
   use_graviton    = local.use_graviton
   task_cpu        = local.task_cpu
@@ -45,17 +45,9 @@ module "fargate" {
   }
 }
 
-module "acm_certificate" {
-  source                  = "github.com/patterninc/terraform-acm-ssl-cert.git?ref=v1.2.1"
-  certificate_domain_name = local.app_domain_name
-  providers = {
-    aws = aws.{INFRA_REGION}
-  }
-}
-
 module "alb" {
-  source     = "github.com/patterninc/terraform-aws-alb.git?ref=v1.4.9"
-  name       = "aws-fargate-example-alb"
+  source     = "github.com/patterninc/terraform-aws-alb?ref=v1.4.9"
+  name       = "${local.app_name}-${local.environment}-alb"
   vpc_id     = data.aws_vpc.vpc.id
   subnet_ids = data.aws_subnets.public.ids
   target_groups = {
@@ -89,7 +81,7 @@ module "alb" {
     },
     443 = {
       protocol              = "HTTPS"
-      https_certificate_arn = module.acm_certificate.arn
+      https_certificate_arn = aws_acm_certificate.cert.arn
       ssl_policy            = "ELBSecurityPolicy-TLS-1-2-Ext-2018-06"
       redirect_to           = null
       forward_to = {
