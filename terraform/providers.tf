@@ -1,9 +1,3 @@
-locals {
-  account_id      = "{ACCOUNT_ID}"
-  account_profile = "{ACCOUNT_PROFILE}"
-  account_region  = "{ACCOUNT_REGION}"
-  github_repo     = "{GITHUB_REPO}"
-}
 
 terraform {
   required_version = ">=1.11.0"
