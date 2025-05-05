@@ -46,8 +46,8 @@ module "fargate" {
 }
 
 module "acm_certificate" {
-  source                 = "github.com/patterninc/terraform-acm-ssl-cert.git?ref=v1.2.1"
-  cetificate_domain_name = local.app_domain_name
+  source                  = "github.com/patterninc/terraform-acm-ssl-cert.git?ref=v1.2.1"
+  certificate_domain_name = local.app_domain_name
   providers = {
     aws = aws.{INFRA_REGION}
   }
@@ -61,8 +61,9 @@ module "alb" {
   target_groups = {
     main = {
       port                 = 3000
-      protocol             = "HTTP"
       type                 = "ip"
+      deregistration_delay = null
+      slow_start           = null
       health_check = {
         path                = "/"
         interval            = 30
@@ -70,12 +71,14 @@ module "alb" {
         healthy_threshold   = 1
         unhealthy_threshold = 5
       }
+      stickiness_cookie_duration = null
     }
   }
   listeners = {
     80 = {
       protocol              = "HTTP"
       https_certificate_arn = null
+      ssl_policy            = null
       redirect_to = {
         host     = null
         path     = null
