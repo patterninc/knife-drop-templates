@@ -5,13 +5,13 @@ locals {
   github_repo     = "{GITHUB_REPO}"
 
 
-  app_name        = "{NAME}"
-  environment     = "{ENVIRONMENT}"
-  infra_region    = "{INFRA_REGION}"
-  repo            = "{NAME}-{ENVIRONMENT}-{INFRA_REGION}"
-  ecrUrl          = "{ACCOUNT_ID}.dkr.ecr.{INFRA_REGION}.amazonaws.com"
-  docker_image    = "{ACCOUNT_ID}.dkr.ecr.{INFRA_REGION}.amazonaws.com/${local.repo}"
-  vpc_name        = "{VPC_NAME}"
+  app_name     = "{NAME}"
+  environment  = "{ENVIRONMENT}"
+  infra_region = "{INFRA_REGION}"
+  repo         = "{NAME}-{ENVIRONMENT}-{INFRA_REGION}"
+  ecrUrl       = "{ACCOUNT_ID}.dkr.ecr.{INFRA_REGION}.amazonaws.com"
+  docker_image = "{ACCOUNT_ID}.dkr.ecr.{INFRA_REGION}.amazonaws.com/${local.repo}"
+  vpc_name     = "{VPC_NAME}"
 
   task_cpu        = 1024
   task_memory     = 2048
