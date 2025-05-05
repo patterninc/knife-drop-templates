@@ -81,7 +81,7 @@ module "alb" {
     },
     443 = {
       protocol              = "HTTPS"
-      https_certificate_arn = aws_acm_certificate.cert.arn
+      https_certificate_arn = data.aws_acm_certificate.cert.arn
       ssl_policy            = "ELBSecurityPolicy-TLS-1-2-Ext-2018-06"
       redirect_to           = null
       forward_to = {
@@ -96,6 +96,33 @@ module "alb" {
   }
 }
 
+data "aws_acm_certificate" "cert" {
+  domain   = "*.${local.domain_name}"
+  statuses = ["ISSUED"]
+}
+
 output "alb_endpoint" {
   value = module.alb.alb.dns_name
+}
+
+
+data "aws_lb" "alb" {
+  name = "${local.app_name}-${local.environment}-alb"
+  depends_on = [ module.alb ]
+}
+
+data "aws_route53_zone" "account_domain" {
+  name         = local.domain_name
+  private_zone = false
+}
+
+resource "aws_route53_record" "app_domain" {
+  zone_id = data.aws_route53_zone.account_domain.zone_id
+  name = local.app_domain_name
+  type    = "A"
+  alias {
+    name                   = data.aws_lb.alb.dns_name
+    zone_id                = data.aws_lb.alb.zone_id
+    evaluate_target_health = true
+  }
 }
