@@ -96,25 +96,21 @@ module "alb" {
   }
 }
 
-data "aws_acm_certificate" "cert" {
-  domain   = "*.${local.domain_name}"
-  statuses = ["ISSUED"]
-  providers = {
-    aws = aws.{INFRA_REGION}
-  }
-}
-
 output "alb_endpoint" {
   value = module.alb.alb.dns_name
 }
 
 
+data "aws_acm_certificate" "cert" {
+  domain   = "*.${local.domain_name}"
+  statuses = ["ISSUED"]
+  provider = aws.{INFRA_REGION}
+}
+
 data "aws_lb" "alb" {
-  name = "${local.app_name}-${local.environment}-alb"
-  depends_on = [ module.alb ]
-  providers = {
-    aws = aws.{INFRA_REGION}
-  }
+  name       = "${local.app_name}-${local.environment}-alb"
+  depends_on = [module.alb]
+  provider   = aws.{INFRA_REGION}
 }
 
 data "aws_route53_zone" "account_domain" {
@@ -124,7 +120,7 @@ data "aws_route53_zone" "account_domain" {
 
 resource "aws_route53_record" "app_domain" {
   zone_id = data.aws_route53_zone.account_domain.zone_id
-  name = local.app_domain_name
+  name    = local.app_domain_name
   type    = "A"
   alias {
     name                   = data.aws_lb.alb.dns_name
