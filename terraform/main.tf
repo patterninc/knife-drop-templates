@@ -40,6 +40,8 @@ module "fargate" {
   module_depends_on             = [module.alb.alb]
   context                       = module.this.context
 
+  enable_datadog_logging = false #no dd in sandbox
+
   providers = {
     aws = aws.{INFRA_REGION}
   }
@@ -60,7 +62,7 @@ module "alb" {
         path                = "/"
         interval            = 30
         timeout             = 10
-        healthy_threshold   = 1
+        healthy_threshold   = 2
         unhealthy_threshold = 5
       }
       stickiness_cookie_duration = null
